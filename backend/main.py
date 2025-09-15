@@ -1,50 +1,34 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from typing import Dict, List, Tuple
+from typing import List
 
 app = FastAPI()
 
-class PrivateChatManager:
+class ChatManager:
     def __init__(self):
-        # rooms = { room_id: [WebSocket1, WebSocket2] }
-        self.rooms: Dict[str, List[WebSocket]] = {}
+        self.connections: List[WebSocket] = []
 
-    def get_room_id(self, user1: str, user2: str) -> str:
-        """Generate a unique room ID for two users"""
-        return "_".join(sorted([user1, user2]))
-
-    async def connect(self, room_id: str, websocket: WebSocket):
-        """Add a user's WebSocket to a room"""
+    async def connect(self, websocket: WebSocket):
         await websocket.accept()
-        if room_id not in self.rooms:
-            self.rooms[room_id] = []
-        self.rooms[room_id].append(websocket)
+        self.connections.append(websocket)
 
-    def disconnect(self, room_id: str, websocket: WebSocket):
-        """Remove a user's WebSocket from a room"""
-        if room_id in self.rooms:
-            self.rooms[room_id].remove(websocket)
-            if not self.rooms[room_id]:
-                del self.rooms[room_id]
+    def disconnect(self, websocket: WebSocket):
+        self.connections.remove(websocket)
 
-    async def send_message(self, room_id: str, message: str):
-        """Send a message to all sockets in a room"""
-        if room_id in self.rooms:
-            for connection in self.rooms[room_id]:
-                await connection.send_text(message)
+    async def broadcast(self, message: str):
+        for connection in self.connections:
+            await connection.send_text(message)
 
 
-chat_manager = PrivateChatManager()
+chat_manager = ChatManager()
 
 
-@app.websocket("/ws/{user1}/{user2}/{username}")
-async def websocket_endpoint(websocket: WebSocket, user1: str, user2: str, username: str):
-    room_id = chat_manager.get_room_id(user1, user2)
-    await chat_manager.connect(room_id, websocket)
-
+@app.websocket("/ws/{username}")
+async def websocket_endpoint(websocket: WebSocket, username: str):
+    await chat_manager.connect(websocket)
     try:
         while True:
             data = await websocket.receive_text()
-            await chat_manager.send_message(room_id, f"{username}: {data}")
+            await chat_manager.broadcast(f"{username}: {data}")
     except WebSocketDisconnect:
-        chat_manager.disconnect(room_id, websocket)
-        await chat_manager.send_message(room_id, f"⚠️ {username} left the chat")
+        chat_manager.disconnect(websocket)
+        await chat_manager.broadcast(f"⚠️ {username} left the chat")
