@@ -1,50 +1,105 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from typing import Dict, List, Tuple
+from fastapi import FastAPI, Depends, WebSocket, WebSocketDisconnect, HTTPException
+from sqlalchemy.orm import Session
+from database import SessionLocal, engine
+from models import Base, User
+from schemas import UserCreate, UserLogin, Token
+from auth import verify_password, get_password_hash, create_access_token, decode_access_token
+from typing import List
+
+Base.metadata.create_all(bind=engine)
+
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-class PrivateChatManager:
+origins = [
+    "http://localhost:5173",  # React dev server
+    "http://127.0.0.1:5173",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,          # or ["*"] for all origins (not safe for prod)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Dependency
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# --- Auth routes ---
+@app.post("/signup", response_model=Token)
+def signup(user: UserCreate, db: Session = Depends(get_db)):
+    if db.query(User).filter(User.email == user.email).first():
+        raise HTTPException(status_code=400, detail="Email already registered")
+    if db.query(User).filter(User.username == user.username).first():
+        raise HTTPException(status_code=400, detail="Username already taken")
+
+    hashed_password = get_password_hash(user.password)
+    new_user = User(
+        email=user.email,
+        username=user.username,
+        hashed_password=hashed_password
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    token = create_access_token(new_user.id, new_user.username, new_user.email)
+    return {"access_token": token, "token_type": "bearer"}
+
+@app.post("/login", response_model=Token)
+def login(user: UserLogin, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.email == user.email).first()
+    if not db_user or not verify_password(user.password, db_user.hashed_password):
+        raise HTTPException(status_code=400, detail="Invalid credentials")
+    
+    token = create_access_token(db_user.id, db_user.username, db_user.email)
+    return {"access_token": token, "token_type": "bearer"}
+
+# --- Global chat manager ---
+class ChatManager:
     def __init__(self):
-        # rooms = { room_id: [WebSocket1, WebSocket2] }
-        self.rooms: Dict[str, List[WebSocket]] = {}
+        self.connections: List[WebSocket] = []
 
-    def get_room_id(self, user1: str, user2: str) -> str:
-        """Generate a unique room ID for two users"""
-        return "_".join(sorted([user1, user2]))
-
-    async def connect(self, room_id: str, websocket: WebSocket):
-        """Add a user's WebSocket to a room"""
+    async def connect(self, websocket: WebSocket):
         await websocket.accept()
-        if room_id not in self.rooms:
-            self.rooms[room_id] = []
-        self.rooms[room_id].append(websocket)
+        self.connections.append(websocket)
 
-    def disconnect(self, room_id: str, websocket: WebSocket):
-        """Remove a user's WebSocket from a room"""
-        if room_id in self.rooms:
-            self.rooms[room_id].remove(websocket)
-            if not self.rooms[room_id]:
-                del self.rooms[room_id]
+    def disconnect(self, websocket: WebSocket):
+        self.connections.remove(websocket)
 
-    async def send_message(self, room_id: str, message: str):
-        """Send a message to all sockets in a room"""
-        if room_id in self.rooms:
-            for connection in self.rooms[room_id]:
-                await connection.send_text(message)
+    async def broadcast(self, message: str):
+        for conn in self.connections:
+            await conn.send_text(message)
 
+chat_manager = ChatManager()
 
-chat_manager = PrivateChatManager()
+# --- WebSocket with JWT auth ---
+@app.websocket("/ws/")
+async def websocket_endpoint(websocket: WebSocket, token: str):
+    user = decode_access_token(token)
+    if not user:
+        await websocket.close(code=1008)
+        return
 
+    username = user["username"]
+    user_id = user["user_id"]
 
-@app.websocket("/ws/{user1}/{user2}/{username}")
-async def websocket_endpoint(websocket: WebSocket, user1: str, user2: str, username: str):
-    room_id = chat_manager.get_room_id(user1, user2)
-    await chat_manager.connect(room_id, websocket)
+    await chat_manager.connect(websocket)
+    await chat_manager.broadcast(f"⚡ {username} joined the chat")
 
     try:
         while True:
             data = await websocket.receive_text()
-            await chat_manager.send_message(room_id, f"{username}: {data}")
+            await chat_manager.broadcast(f"{username}: {data} (id: {user_id})")
     except WebSocketDisconnect:
-        chat_manager.disconnect(room_id, websocket)
-        await chat_manager.send_message(room_id, f"⚠️ {username} left the chat")
+        chat_manager.disconnect(websocket)
+        await chat_manager.broadcast(f"⚠️ {username} left the chat")
+
