@@ -68,7 +68,7 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-blend-multiply bg-main-yellow/80 bg-contain" style={{ backgroundImage: "url('pattern.jpg')" }}>
+    <div className="flex p-6 items-center justify-center min-h-screen bg-blend-multiply bg-main-yellow/80 bg-contain" style={{ backgroundImage: "url('pattern.jpg')" }}>
       <div className="p-8 w-full bg-main-yellow max-w-md border-box">
         <h2 className="text-5xl font-extrabold mb-6 text-center">
           {isLogin ? "Login" : "Signup"}
