@@ -9,6 +9,7 @@ import { Send } from "@mui/icons-material";
 import type { UserType } from "../../types/UserType";
 import Message from "../form/Message";
 import type { MessageType } from "../../types/MessageType";
+import NavBar from "../utility/NavBar";
 
 const ChatRoom: React.FC = () => {
   const { roomId } = useParams<{ roomId: string }>();
@@ -65,6 +66,7 @@ const ChatRoom: React.FC = () => {
 
   return (
     <div className="flex items-center justify-center p-4 min-h-screen bg-blend-multiply bg-main-yellow/80 bg-contain" style={{ backgroundImage: "url('/pattern.jpg')" }}>
+      <NavBar />
      <div className="flex flex-col gap-4 border-box bg-main-yellow p-6 w-full max-w-[35rem]">
       <h2 className="text-3xl font-extrabold"><div className="text-5xl pb-1">Chat Room:</div> <div className="text-white">{roomId}</div></h2>
       <div className="border-box bg-white overflow-auto p-2 flex flex-col gap-2 h-[25rem]">
