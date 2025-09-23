@@ -1,22 +1,46 @@
+import uuid
 from sqlalchemy.orm import Session
-from models import Room, UserRoomLink
-from typing import List
+from models import Room, User, UserRoomLink
+from typing import List, Optional
 
 def get_room(db: Session, room_id: str):
     return db.query(Room).filter(Room.id == room_id).first()
 
-def create_room(db: Session, room_id: str, user_ids: List[str]):
-    new_room = Room(id=room_id)
-    db.add(new_room)
-    db.commit()
-    db.refresh(new_room)
+def create_room(db: Session, room_id: Optional[str], user_ids: List[str]):
+    if room_id is None:
+        room_id = str(uuid.uuid4())
 
-    for u_id in user_ids:
-        link = UserRoomLink(user_id=u_id, room_id=new_room.id)
-        db.add(link)
+    room = Room(id=room_id)
+    db.add(room)
+
+    for user_id in user_ids:
+        # avoid duplicates
+        if not db.query(UserRoomLink).filter_by(user_id=user_id, room_id=room_id).first():
+            db.add(UserRoomLink(user_id=user_id, room_id=room_id))
+
     db.commit()
-    db.refresh(new_room)
-    return new_room
+    db.refresh(room) 
+
+    return room
 
 def room_exists(db: Session, room_id: str) -> bool:
     return db.query(Room).filter(Room.id == room_id).first()
+
+def get_rooms_for_user(db: Session, user_id: str) -> List[Room]:
+ 
+    return (
+        db.query(Room)
+        .join(UserRoomLink, Room.id == UserRoomLink.room_id)
+        .filter(UserRoomLink.user_id == user_id)
+        .all()
+    )
+
+def get_users_in_room(db: Session, room_id: str) -> List[User]:
+
+    users = (
+        db.query(User)
+        .join(UserRoomLink, User.id == UserRoomLink.user_id)
+        .filter(UserRoomLink.room_id == room_id)
+        .all()
+    )
+    return users

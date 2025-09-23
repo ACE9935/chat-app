@@ -1,14 +1,13 @@
 import { useState } from "react";
-import api from "../../api";
-import { jwtDecode } from "jwt-decode";
 import BasicInput from "../form/BasicInput";
 import Button from "../form/Button";
 import {useNavigate} from 'react-router-dom';
-import { useUser, type UserInfos } from "../context/UserContext";
+import { useUser} from "../context/UserContext";
+import { authService } from "../../services/authService";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true); 
-  const { user, setUser } = useUser();
+  const { setUser } = useUser();
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState(""); 
   const [password, setPassword] = useState("");
@@ -24,15 +23,11 @@ export default function AuthPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    let new_user = null;
     try {
       if (isLogin) {
-        // --- Login ---
-        const res = await api.post(`/login`, { email, password });
-        localStorage.setItem("access_token", res.data.access_token);
-        const user: UserInfos = jwtDecode(res.data.access_token);
-        console.log(`Welcome ${user.username}`);
-        setUser(user);
+        new_user= await authService.login({ email, password });
+        setUser(new_user);
       } else {
         // --- Signup validations ---
         if (!validatePassword(password)) {
@@ -46,14 +41,12 @@ export default function AuthPage() {
           return;
         }
 
-        const res = await api.post(`/signup`, { email, username, password });
-        localStorage.setItem("access_token", res.data.access_token);
-        const user: UserInfos = jwtDecode(res.data.access_token);
-        console.log(`Welcome ${user.username}`);
-        setUser(user);
+        new_user= await authService.signup({ email, username, password });
+        setUser(new_user);
       }
 
-      if(user){
+      if(new_user){
+       console.log(new_user);
        navigate('/chat')
       }
       
