@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from models import User, Room
+from backend.models import User, Room
 
 def get_users_by_search(db: Session, search: str, limit: int = 5):
     return db.query(User).filter(User.username.ilike(f"%{search}%")).limit(limit).all()

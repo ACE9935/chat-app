@@ -1,6 +1,6 @@
 import uuid
 from sqlalchemy.orm import Session
-from models import Room, User, UserRoomLink
+from backend.models import Room, User, UserRoomLink
 from typing import List, Optional
 
 def get_room(db: Session, room_id: str):
@@ -36,7 +36,7 @@ def get_rooms_for_user(db: Session, user_id: str) -> List[Room]:
     )
 
 def get_users_in_room(db: Session, room_id: str) -> List[User]:
-
+    
     users = (
         db.query(User)
         .join(UserRoomLink, User.id == UserRoomLink.user_id)

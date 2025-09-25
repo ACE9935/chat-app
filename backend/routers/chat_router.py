@@ -1,20 +1,19 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
 from sqlmodel import Session
-from typing import Dict, List
-from services.chat_service import save_message, get_messages_for_room
+from typing import Annotated, Dict, List
+from services.chat_service import save_message
 from database import get_db
 from uuid import UUID
 
 router = APIRouter()
 
-# Track active WebSocket connections per room
 active_connections: Dict[UUID, List[WebSocket]] = {}
 
 @router.websocket("/ws/private/{room_id}")
 async def websocket_chat(
     room_id: UUID,
     websocket: WebSocket,
-    db: Session = Depends(get_db)
+    db: Annotated[Session, Depends(get_db)]
 ):
     await websocket.accept()
 

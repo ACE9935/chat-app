@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from models import User
-from auth import get_password_hash, verify_password
+from backend.models import User
+from backend.auth import get_password_hash, verify_password
 from typing import Optional
 
 def signup_user(db: Session, email: str, username: str, password: str) -> User:

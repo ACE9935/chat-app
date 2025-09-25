@@ -1,3 +1,4 @@
+from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from models import User
@@ -9,7 +10,7 @@ from auth import create_access_token
 router = APIRouter(prefix="/v1/auth",tags=["Auth"])
 
 @router.post("/signup", response_model=Token)
-def signup(user: UserCreate, db: Session = Depends(get_db)):
+def signup(user: UserCreate, db: Annotated[Session, Depends(get_db)]):
     existing_email = db.query(User).filter(User.email == user.email).first()
     if existing_email:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -22,7 +23,7 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
     return {"access_token": token, "token_type": "bearer"}
 
 @router.post("/login", response_model=Token)
-def login(user: UserLogin, db: Session = Depends(get_db)):
+def login(user: UserLogin, db: Annotated[Session, Depends(get_db)]):
     db_user = login_user(db, user.email, user.password)
     if not db_user:
         raise HTTPException(status_code=400, detail="Invalid credentials")

@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from models import Message
+from backend.models import Message
 from typing import List
 
 def save_message(db: Session, text: str, user_id: str, room_id: str) -> Message:
