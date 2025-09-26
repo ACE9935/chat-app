@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from typing import Annotated, List
-from schemas import UserInfos
-from services.user_service import get_users_by_search, get_user_rooms
-from database import get_db
+from backend.schemas import UserInfos
+from backend.services.user_service import get_users_by_search, get_user_rooms
+from backend.database import get_db
 
 router = APIRouter(prefix="/v1/users", tags=["Users"])
 

@@ -1,11 +1,11 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from models import User
-from schemas import UserCreate, UserLogin, Token
-from services.auth_service import signup_user, login_user
-from database import get_db
-from auth import create_access_token
+from backend.models import User
+from backend.schemas import UserCreate, UserLogin, Token
+from backend.services.auth_service import signup_user, login_user
+from backend.database import get_db
+from backend.auth import create_access_token
 
 router = APIRouter(prefix="/v1/auth",tags=["Auth"])
 

@@ -1,12 +1,12 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, Body, HTTPException
 from sqlalchemy.orm import Session
-from models import Message
+from backend.models import Message
 from typing import Annotated, List, Optional
-from schemas import UserInfos
-from services.room_service import get_room, create_room, get_users_in_room, room_exists, get_rooms_for_user
-from database import get_db
-from services.chat_service import get_messages_for_room
+from backend.schemas import UserInfos
+from backend.services.room_service import get_room, create_room, get_users_in_room, room_exists, get_rooms_for_user
+from backend.database import get_db
+from backend.services.chat_service import get_messages_for_room
 
 router = APIRouter(prefix="/v1/rooms", tags=["Rooms"])
 
@@ -28,11 +28,10 @@ def get_user_rooms(user_id: str, db: Session = Depends(get_db)):
 @router.post("/")
 def create_new_room(
     db: Annotated[Session, Depends(get_db)],
-    room_id: Optional[str] = Body(None),
     user_ids: List[str] = Body(...),
 ):
 
-    return create_room(db, room_id, user_ids)
+    return create_room(db, user_ids)
 
 # --- Get messages for a room ---
 @router.get("/room/{room_id}", response_model=List[Message])

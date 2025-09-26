@@ -1,8 +1,8 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
 from sqlmodel import Session
 from typing import Annotated, Dict, List
-from services.chat_service import save_message
-from database import get_db
+from backend.services.chat_service import save_message
+from backend.database import get_db
 from uuid import UUID
 
 router = APIRouter()

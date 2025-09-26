@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from sqlmodel import SQLModel
-from database import engine
-from routers import auth_router, user_router, room_router, chat_router
+from backend.database import engine
+from backend.routers import auth_router, user_router, room_router, chat_router
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 

@@ -6,17 +6,16 @@ from typing import List, Optional
 def get_room(db: Session, room_id: str):
     return db.query(Room).filter(Room.id == room_id).first()
 
-def create_room(db: Session, room_id: Optional[str], user_ids: List[str]):
-    if room_id is None:
-        room_id = str(uuid.uuid4())
+def create_room(db: Session, user_ids: List[str]):
 
-    room = Room(id=room_id)
+    room = Room()
     db.add(room)
+    db.refresh(room) 
 
     for user_id in user_ids:
         # avoid duplicates
-        if not db.query(UserRoomLink).filter_by(user_id=user_id, room_id=room_id).first():
-            db.add(UserRoomLink(user_id=user_id, room_id=room_id))
+        if not db.query(UserRoomLink).filter_by(user_id=user_id, room_id=room.id).first():
+            db.add(UserRoomLink(user_id=user_id, room_id=room.id))
 
     db.commit()
     db.refresh(room) 
