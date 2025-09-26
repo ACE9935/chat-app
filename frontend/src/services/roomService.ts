@@ -1,9 +1,5 @@
 import api from "../api";
 
-interface CreateRoomPayload {
-  room_id?: string;
-  user_ids: string[];
-}
 
 interface MessagePayload {
   text: string;
@@ -15,7 +11,7 @@ export const roomService = {
     return res.data;
   },
 
-  createRoom: async (payload: CreateRoomPayload) => {
+  createRoom: async (payload: string[]) => {
     const res = await api.post("/rooms/", payload);
     return res.data;
   },

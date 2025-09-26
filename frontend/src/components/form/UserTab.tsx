@@ -13,7 +13,7 @@ function UserTab({user,handler}:{user:UserType, handler?:() => void}) {
         return;
       }
         try {
-            const room = await roomService.createRoom({user_ids: [loggedInUser.user_id, otherUserId]});
+            const room = await roomService.createRoom([loggedInUser.user_id, otherUserId]);
             handler && handler();
             navigate('/chat/'+room.id);
         } catch (error) {

@@ -1,7 +1,5 @@
 import Modal from '@mui/material/Modal';
 import { useState, useEffect } from "react";
-import type { RoomType } from '../../types/RoomType';
-import { roomService } from '../../services/roomService';
 import { useUser } from '../context/UserContext';
 import BasicInput from './BasicInput';
 import { userService } from '../../services/userService';
@@ -10,26 +8,9 @@ import { Search } from '@mui/icons-material';
 import UserTab from './UserTab';
 
 function NewRoomModal({open, handleClose}: {open: boolean, handleClose: () => void}) {
-    const [rooms, setRooms] = useState<RoomType[]>([]);
     const [users, setUsers] = useState<UserType[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const {user} = useUser();
-
-    useEffect(() => {
-        const fetchRooms = async () => {
-          try {
-            if (!user) {
-              return;
-            }
-            const data = await roomService.getUserRooms(user.user_id);
-            setRooms(data);
-          } catch (error) {
-            console.error('Error fetching rooms:', error);
-          }
-        };
-    
-        fetchRooms();
-    }, [user]);
 
     useEffect(() => {
         const fetchUsers = async () => {
