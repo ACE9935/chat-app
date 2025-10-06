@@ -14,6 +14,7 @@ function App() {
     <UserProvider>
       <Router>
         <Routes>
+          <Route path="/" element={<div>Hello World</div>} />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/chat" element={<PrivateRoute><ChatPage /></PrivateRoute>} />
           {/* Dynamic room route */}

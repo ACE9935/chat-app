@@ -8,7 +8,6 @@ class UserRoomLink(SQLModel, table=True):
     user_id: UUID = Field(foreign_key="user.id", primary_key=True)
     room_id: UUID = Field(foreign_key="room.id", primary_key=True)
 
-
 # --- User model ---
 class User(SQLModel, table=True):
     __tablename__ = "user"
@@ -21,6 +20,9 @@ class User(SQLModel, table=True):
     rooms: List["Room"] = Relationship(back_populates="users", link_model=UserRoomLink)
     messages: List["Message"] = Relationship(back_populates="user")
 
+    model_config = {
+        "from_attributes": True  # Pydantic v2 replacement for orm_mode
+    }
 
 # --- Room model ---
 class Room(SQLModel, table=True):
@@ -31,6 +33,9 @@ class Room(SQLModel, table=True):
     users: List[User] = Relationship(back_populates="rooms", link_model=UserRoomLink)
     messages: List["Message"] = Relationship(back_populates="room")
 
+    model_config = {
+        "from_attributes": True
+    }
 
 # --- Message model ---
 class Message(SQLModel, table=True):
@@ -44,3 +49,7 @@ class Message(SQLModel, table=True):
 
     user: Optional[User] = Relationship(back_populates="messages")
     room: Optional[Room] = Relationship(back_populates="messages")
+
+    model_config = {
+        "from_attributes": True
+    }
