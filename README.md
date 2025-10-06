@@ -33,15 +33,29 @@ This project is a real-time chat web application featuring a seamless user inter
 
 ## Getting Started
 
-### Backend
+### Backend Setup
+
+**Install dependencies:**
+```bash
+uv sync --frozen --no-cache
+```
 
 **Run the backend server:**
-```bash uv run uvicorn src.api.main:app --host 0.0.0.0 --port 8000
+```bash
+uv run uvicorn src.api.main:app --host 0.0.0.0 --port 8000
+```
 
 ### Frontend Setup
 
-Install dependencies:
+**Install dependencies:**
 
 ```bash
 npm install
+```
+
+**Run the frontend development server:**
+
+```bash
+npm run dev
+```
 
