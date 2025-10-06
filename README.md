@@ -59,3 +59,20 @@ npm install
 npm run dev
 ```
 
+**Access the app:**
+Open your browser at http://localhost:3000
+
+### Running with Docker
+
+**Build and start containers:**
+
+```bash
+docker compose up --build
+```
+
+**Stop containers:**
+
+```bash
+docker compose down
+```
+
