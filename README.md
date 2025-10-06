@@ -33,17 +33,15 @@ This project is a real-time chat web application featuring a seamless user inter
 
 ## Getting Started
 
-### Prerequisites
-- Docker & Docker Compose installed
-- Node.js & npm installed
-- Python 3.12+ installed (if running backend locally without Docker)
-
----
-
-## Getting Started
-
 ### Backend
 
 **Run the backend server:**
+```bash uv run uvicorn src.api.main:app --host 0.0.0.0 --port 8000
+
+### Frontend Setup
+
+Install dependencies:
+
 ```bash
-uv run uvicorn src.api.main:app --host 0.0.0.0 --port 8000
+npm install
+
