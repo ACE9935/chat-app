@@ -35,6 +35,11 @@ This project is a real-time chat web application featuring a seamless user inter
 
 ### Backend Setup
 
+**Navigate to the backend directory:**
+```bash
+cd backend
+```
+
 **Install dependencies:**
 ```bash
 uv sync --frozen --no-cache
@@ -46,6 +51,11 @@ uv run uvicorn src.api.main:app --host 0.0.0.0 --port 8000
 ```
 
 ### Frontend Setup
+
+**Navigate to the frontend directory:**
+```bash
+cd frontend
+```
 
 **Install dependencies:**
 
@@ -75,4 +85,11 @@ docker compose up --build
 ```bash
 docker compose down
 ```
+
+### Testing
+```bash
+cd backend
+pytest tests
+```
+
 
