@@ -15,8 +15,17 @@
   border-radius: none ! important;
 }
 
+.border-box-2{
+  border: 3px solid white;
+  border-radius: none ! important;
+}
+
 .box-shadow-effect{
   box-shadow: 6px 6px 0px 0px rgb(255, 255, 255);
+}
+
+.box-shadow-effect-2{
+  box-shadow: 6px 6px 0px 0px black;
 }
 
 .animation-transition{
